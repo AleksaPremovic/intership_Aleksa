@@ -149,7 +149,6 @@ This project includes JWT support in Swagger. To test protected endpoints:
 **Davor Pajić**  
 Senior Full Stack Engineer  
 .NET / React / MSSQL / AWS / Clean Architecture  
-[GitHub](https://github.com/dpajic-midenas)
 
 ---
 
