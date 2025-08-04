@@ -1,6 +1,7 @@
 using Internship_Aleksa.Data;
 using Internship_Aleksa.Domain.Interfaces;
 using Internship_Aleksa.Data.Repositories;
+using Internship_Aleksa.Data.Services;  
 using Internship_Aleksa.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<StudentService>();
+
+builder.Services.AddScoped<ICourseService, CourseService>();  // Registracija Course servisa
 
 var app = builder.Build();
 
