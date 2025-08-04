@@ -1,0 +1,47 @@
+## Build artifacts
+bin/
+obj/
+
+## Rider files
+.idea/
+*.sln.iml
+
+## User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+## VS Code files
+.vscode/
+
+## ASP.NET secrets (ako koristiš)
+**/secrets.json
+
+## Logs
+*.log
+
+## Database
+*.mdf
+*.ldf
+
+## Publish output
+publish/
+out/
+
+## Test results
+TestResults/
+*.trx
+*.coverage
+
+## npm / Node (ako bude React UI)
+node_modules/
+dist/
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Launch config
+**/launchSettings.json
