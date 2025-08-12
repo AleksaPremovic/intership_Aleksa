@@ -40,11 +40,30 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure MSSQL and DI
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<Internship_Aleksa.Data.FileStorage.FileStorageOptions>(
+    builder.Configuration.GetSection("Storage"));
 
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+var useFileStorage = builder.Configuration.GetSection("Storage").GetValue<bool>("UseFileStorage");
+
+if (useFileStorage)
+{
+    // Register file-based repositories
+    builder.Services.AddSingleton<Internship_Aleksa.Data.FileStorage.FileStorageOptions>(
+        sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<Internship_Aleksa.Data.FileStorage.FileStorageOptions>>().Value);
+
+    builder.Services.AddSingleton<Internship_Aleksa.Domain.Interfaces.IStudentRepository, Internship_Aleksa.Data.FileStorage.StudentFileRepository>();
+
+}
+else
+{
+
+// Configure MSSQL and DI
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+}
+
 builder.Services.AddScoped<StudentService>();
 
 var app = builder.Build();
