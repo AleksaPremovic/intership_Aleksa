@@ -8,10 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Internship_Aleksa.Data.FileStorage;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -40,24 +42,21 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.Configure<Internship_Aleksa.Data.FileStorage.FileStorageOptions>(
+
+builder.Services.Configure<FileStorageOptions>(
     builder.Configuration.GetSection("Storage"));
 
 var useFileStorage = builder.Configuration.GetSection("Storage").GetValue<bool>("UseFileStorage");
 
 if (useFileStorage)
 {
-    // Register file-based repositories
-    builder.Services.AddSingleton<Internship_Aleksa.Data.FileStorage.FileStorageOptions>(
-        sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<Internship_Aleksa.Data.FileStorage.FileStorageOptions>>().Value);
+    builder.Services.AddSingleton<FileStorageOptions>(
+        sp => sp.GetRequiredService<IOptions<FileStorageOptions>>().Value);
 
-    builder.Services.AddSingleton<Internship_Aleksa.Domain.Interfaces.IStudentRepository, Internship_Aleksa.Data.FileStorage.StudentFileRepository>();
-
+    builder.Services.AddSingleton<IStudentRepository, StudentFileRepository>();
 }
 else
 {
-
-// Configure MSSQL and DI
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -66,16 +65,21 @@ else
 
 builder.Services.AddScoped<StudentService>();
 
+builder.Services.AddSingleton<CourseFileStorage>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseHttpsRedirection();
 app.UseAuthorization();
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Internship API v1");
+    c.RoutePrefix = ""; // Swagger se otvara na root-u: https://localhost:51775/
+});
+
 
 app.MapControllers();
 
