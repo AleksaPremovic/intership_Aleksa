@@ -28,7 +28,6 @@ namespace Internship_Aleksa.API.Controllers
                 Id = c.Id,
                 Name = c.Name,
                 Description = c.Description,
-                FileName = c.FileName
             }).ToList();
             return Ok(dtos);
         }
@@ -45,7 +44,6 @@ namespace Internship_Aleksa.API.Controllers
                 Id = course.Id,
                 Name = course.Name,
                 Description = course.Description,
-                FileName = course.FileName
             };
             return Ok(dto);
         }
@@ -58,11 +56,10 @@ namespace Internship_Aleksa.API.Controllers
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                FileName = dto.FileName
             };
 
             _storage.Add(course);
-            return Ok(course); // vraća novi kurs sa generisanim ID-jem
+            return Ok(course); 
         }
 
         // PUT: /api/Courses
@@ -74,7 +71,6 @@ namespace Internship_Aleksa.API.Controllers
                 Id = dto.Id,
                 Name = dto.Name,
                 Description = dto.Description,
-                FileName = dto.FileName
             };
 
             var existing = _storage.GetById(course.Id);
