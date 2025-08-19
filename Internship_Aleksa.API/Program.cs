@@ -8,10 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Internship_Aleksa.Data.FileStorage;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -40,23 +42,44 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure MSSQL and DI
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.Configure<FileStorageOptions>(
+    builder.Configuration.GetSection("Storage"));
+
+var useFileStorage = builder.Configuration.GetSection("Storage").GetValue<bool>("UseFileStorage");
+
+if (useFileStorage)
+{
+    builder.Services.AddSingleton<FileStorageOptions>(
+        sp => sp.GetRequiredService<IOptions<FileStorageOptions>>().Value);
+
+    builder.Services.AddSingleton<IStudentRepository, StudentFileRepository>();
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+}
+
 builder.Services.AddScoped<StudentService>();
+
+builder.Services.AddSingleton<CourseFileStorage>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseHttpsRedirection();
 app.UseAuthorization();
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Internship API v1");
+    c.RoutePrefix = ""; // Swagger se otvara na root-u: https://localhost:51775/
+});
+
 
 app.MapControllers();
 
